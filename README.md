@@ -2,13 +2,15 @@
 breeze
 
 # Установка
-```mkdir -p /root/bin
+```
+mkdir -p /root/bin
 cd /root/bin
 wget http://evtikhov.ru/breeze.sh -r -N -nd
 cat >> /root/.bashrc <<END
 alias breeze='cd /root/bin/
 sh breeze.sh'
-END```
+END
+```
 
 ### Ссылки
 По статье https://habrahabr.ru/post/309628/
