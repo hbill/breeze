@@ -1,5 +1,5 @@
 # breeze
-breeze
+Linux, VPN, Proxy, CentOS, RHEL
 
 # Установка
 ```
