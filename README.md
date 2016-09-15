@@ -1,6 +1,8 @@
 # breeze
 Linux, VPN, Proxy, CentOS, RHEL
 
+<a href='https://pledgie.com/campaigns/32583'><img alt='Click here to lend your support to: General and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/32583.png?skin_name=chrome' border='0' ></a>
+
 # Установка
 ```
 mkdir -p /root/bin
