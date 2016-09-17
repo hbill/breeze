@@ -9,389 +9,413 @@ title_full="$title $ver"
 #функция, которая запрашивает только один символ
 myread()
 {
-temp=""
-while [ -z "$temp" ] #защита от пустых значений
-do
-read -n 1 temp
-done
-eval $1=$temp
-echo
+	temp=""
+	while [ -z "$temp" ] #защита от пустых значений
+	do
+		read -n 1 temp
+	done
+	eval $1=$temp
+	echo
 }
 
 #функция, которая запрашивает только да или нет. А ещё можно попробовать использовать как while [ -z ${!$1} ]
 myread_yn()
 {
-temp=""
-while [[ "$temp" != "y" && "$temp" != "Y" && "$temp" != "n" && "$temp" != "N" ]] #запрашиваем значение, пока не будет "y" или "n"
-do
-echo -n "y/n: "
-read -n 1 temp
-echo
-done
-eval $1=$temp
+	temp=""
+	while [[ "$temp" != "y" && "$temp" != "Y" && "$temp" != "n" && "$temp" != "N" ]] #запрашиваем значение, пока не будет "y" или "n"
+	do
+		echo -n "y/n: "
+		read -n 1 temp
+		echo
+	done
+	eval $1=$temp
 }
 
 #функция, которая запрашивает только цифру
 myread_dig()
 {
-temp=""
-counter=0
-while [[ "$temp" != "0" && "$temp" != "1" && "$temp" != "2" && "$temp" != "3" && "$temp" != "4" && "$temp" != "5" && "$temp" != "6" && "$temp" != "7" && "$temp" != "8" && "$temp" != "9" ]] #запрашиваем значение, пока не будет цифра
-do
-if [ $counter -ne 0 ]; then echo -n "Неправильный выбор. Ведите цифру: "; fi
-let "counter=$counter+1"
-read -n 1 temp
-echo
-done
-eval $1=$temp
+	temp=""
+	counter=0
+	while [[ "$temp" != "0" && "$temp" != "1" && "$temp" != "2" && "$temp" != "3" && "$temp" != "4" && "$temp" != "5" && "$temp" != "6" && "$temp" != "7" && "$temp" != "8" && "$temp" != "9" ]] #запрашиваем значение, пока не будет цифра
+	do
+		if [ $counter -ne 0 ]; then echo -n "Неправильный выбор. Ведите цифру: "; fi
+		let "counter=$counter+1"
+		read -n 1 temp
+		echo
+	done
+	eval $1=$temp
 }
 
 #функция установки с проверкой не установлен ли уже пакет
 myinstall()
 {
-if [ -z `rpm -qa $1` ]; then
-	yum -y install $1
-else
-	echo "Пакет $1 уже установлен"
-	br
-fi
+	if [ -z `rpm -qa $1` ]; then
+		yum -y install $1
+	else
+		echo "Пакет $1 уже установлен"
+		br
+	fi
 }
 
 title()
 {
-clear
-echo "$title"
+	clear
+	echo "$title"
 }
 
 menu()
 {
-clear
-echo "$menu"
-echo "Выберите пункт меню:"
+	clear
+	echo "$menu"
+	echo "Выберите пункт меню:"
 }
 
 wait()
 {
-echo "Нажмите любую клавишу, чтобы продолжить..."
-read -s -n 1
+	echo "Нажмите любую клавишу, чтобы продолжить..."
+	read -s -n 1
 }
 
 br()
 {
-echo ""
+	echo ""
 }
 
 updatescript()
 {
-wget $updpath/$filename -r -N -nd
-chmod 777 $filename
+	wget $updpath/$filename -r -N -nd
+	chmod 777 $filename
 }
 
 undone()
 {
-echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты№№№№№№№№№№ меню в качестве заглушки
+	echo "Данная функция в стадии разработки или отключена." #функция ставится в нереализованные пункты№№№№№№№№№№ меню в качестве заглушки
 }
 
 settimezone()
 {
-/bin/cp /usr/share/zoneinfo/$1/$2  /etc/localtime
-echo "Новый часовой пояс установлен. Текущее время: $(date +%H:%M)."
-wait
+	/bin/cp /usr/share/zoneinfo/$1/$2  /etc/localtime
+	echo "Новый часовой пояс установлен. Текущее время: $(date +%H:%M)."
+	wait
 }
 
 repo4()
 {
-echo "Будут добавлены репозитории для CentOS 4 x64"
-wait
-echo "Устанавливаем репозитории..."
-wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
-rpm -K rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
-rpm -i rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
+	echo "Будут добавлены репозитории для CentOS 4 x64"
+	wait
+	echo "Устанавливаем репозитории..."
+	wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
+	rpm -K rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
+	rpm -i rpmforge-release-0.5.3-1.el4.rf.x86_64.rpm
 }
 
 repo5()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5 x64"
-wait
-echo "Устанавливаем репозитории..."
-rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
-rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
-rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
-wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
-rpm -K rpmforge-release-0.5.3-1.el5.rf.*.rpm
-rpm -i rpmforge-release-0.5.3-1.el5.rf.*.rpm
-rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
+	echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 5 x64"
+	wait
+	echo "Устанавливаем репозитории..."
+	rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL
+	rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+	rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-5.rpm
+	wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.3-1.el5.rf.x86_64.rpm
+	rpm -K rpmforge-release-0.5.3-1.el5.rf.*.rpm
+	rpm -i rpmforge-release-0.5.3-1.el5.rf.*.rpm
+	rpm -Uvh http://www.elrepo.org/elrepo-release-5-5.el5.elrepo.noarch.rpm
+	br
+	echo "Репозитории были добавлены."
+	wait
 }
 
 repo6()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6 x64"
-wait
-echo "Устанавливаем репозитории..."
-rpm --import https://fedoraproject.org/static/0608B895.txt
-rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
-br
-echo "Репозитории были добавлены."
-wait
+	echo "Будут добавлены репозитории EPEL, REMI, RPMForge и ELRepo для CentOS 6 x64"
+	wait
+	echo "Устанавливаем репозитории..."
+	rpm --import https://fedoraproject.org/static/0608B895.txt
+	rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+	rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+	rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+	rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
+	br
+	echo "Репозитории были добавлены."
+	wait
 }
 
 repo7()
 {
-echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7 x64"
-wait
-echo "Устанавливаем репозитории..."
-rpm --import https://fedoraproject.org/static/0608B895.txt
-rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
-rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
-rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
-rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
-rpm -ivh http://atrpms.net/ht/httptunnel-4.0.0-3_pre1.el7.centos.x86_64.rpm
-br
-echo "Репозитории были добавлены."
-wait
+	echo "Будут добавлены репозитории EPEL, REMI, RPMForge, ELRepo, atrpms для CentOS 7 x64"
+	wait
+	echo "Устанавливаем репозитории..."
+	rpm --import https://fedoraproject.org/static/0608B895.txt
+	rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
+	rpm --import http://packages.atrpms.net/RPM-GPG-KEY.atrpms
+	rpm -ivh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+	rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+	rpm -ivh http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+	rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+	rpm -ivh http://atrpms.net/ht/httptunnel-4.0.0-3_pre1.el7.centos.x86_64.rpm
+	br
+	echo "Репозитории были добавлены."
+	wait
 }
 
 iptables_save()
 {
-#проверка CentOS 7
-if [ $osver1 -eq 7 ]; then 
-	myinstall iptables-services | tee > null
-fi
-service iptables save
+	#проверка CentOS 7
+	if [ $osver1 -eq 7 ]; then 
+		myinstall iptables-services | tee > null
+	fi
+	service iptables save
 }
 
 openport()
 {
-chain=$(echo $1 | tr [:lower:] [:upper:])
-if [ "$chain" == "IN" ]; then chain="INPUT"; t1="dport"
-else
-	if [ "$chain" == "OUT" ]; then chain="OUTPUT";  t1="sport"
+	chain=$(echo $1 | tr [:lower:] [:upper:])
+	if [ "$chain" == "IN" ]; then
+		chain="INPUT"; t1="dport"
 	else
-		echo "неправильно указано направление правила для открытия порта"
-	wait
+		if [ "$chain" == "OUT" ]; then
+			chain="OUTPUT";  t1="sport"
+		else
+			echo "неправильно указано направление правила для открытия порта"
+			wait
+		fi
 	fi
-fi
-iptables -I $chain -p $2 --$t1 $3 -j ACCEPT #возможно в будущем предусмотрю выбор ключа -I или -A
-iptables_save
+	iptables -I $chain -p $2 --$t1 $3 -j ACCEPT #возможно в будущем предусмотрю выбор ключа -I или -A
+	iptables_save
 }
 
 webuzo_install()
 {
-openport in tcp 2004
-openport in tcp 2002
-wget http://files.webuzo.com/install.sh -r -N -nd
-sh install.sh
-rm -f install.sh
+	openport in tcp 2004
+	openport in tcp 2002
+	wget http://files.webuzo.com/install.sh -r -N -nd
+	sh install.sh
+	rm -f install.sh
 }
 
 cwp_install()
 {
-openport in tcp 2030
-openport in tcp 2031
-wget http://centos-webpanel.com/cwp-latest
-sh cwp-latest
-rm -f cwp-latest
+	openport in tcp 2030
+	openport in tcp 2031
+	wget http://centos-webpanel.com/cwp-latest
+	sh cwp-latest
+	rm -f cwp-latest
 }
 
 zpanel_install()
 {
-wget http://evtikhov.ru/zpanel.sh
-sh zpanel.sh
-rm -f zpanel.sh
+	wget http://evtikhov.ru/zpanel.sh
+	sh zpanel.sh
+	rm -f zpanel.sh
 }
 
 ajenti_install()
 {
-openport in tcp 8000
-rpm -i http://repo.ajenti.org/ajenti-repo-1.0-1.noarch.rpm 
-echo "Устанавливаем Ajenti"
-yum -y install ajenti
-echo "Устанавливаем Ajenti V"
-yum -y install ajenti-v ajenti-v-nginx ajenti-v-mysql ajenti-v-php-fpm php-mysql
-echo "Отключаем SSL для админки"
-sed -i -e 's/"enable": true/"enable": false/' /etc/ajenti/config.json
-whatismyipext
-echo "Выставляем наш внешний IP в конфиг"
-sed -i -e "s/\"host\": \"0.0.0.0\"/\"host\": \"$ipext\"/" /etc/ajenti/config.json
-echo "Устанавливаем русский язык по умолчанию"
-sed -i -e 's/    "bind": {/    "language": "ru_RU",\n    "bind": {/' /etc/ajenti/config.json
-echo "Перезапускаем Ajenti"
-service ajenti restart
-br
-echo "Панель управления Ajenti и Ajenti V были установлены. Теперь можете управлять сервером из браузера."
-echo "Адрес: http://$ipext:8000"
-echo "Логин: root"
-echo "Пароль: admin"
-br
-wait
+	openport in tcp 8000
+	rpm -i http://repo.ajenti.org/ajenti-repo-1.0-1.noarch.rpm 
+	echo "Устанавливаем Ajenti"
+	yum -y install ajenti
+	echo "Устанавливаем Ajenti V"
+	yum -y install ajenti-v ajenti-v-nginx ajenti-v-mysql ajenti-v-php-fpm php-mysql
+	echo "Отключаем SSL для админки"
+	sed -i -e 's/"enable": true/"enable": false/' /etc/ajenti/config.json
+	whatismyipext
+	echo "Выставляем наш внешний IP в конфиг"
+	sed -i -e "s/\"host\": \"0.0.0.0\"/\"host\": \"$ipext\"/" /etc/ajenti/config.json
+	echo "Устанавливаем русский язык по умолчанию"
+	sed -i -e 's/    "bind": {/    "language": "ru_RU",\n    "bind": {/' /etc/ajenti/config.json
+	echo "Перезапускаем Ajenti"
+	service ajenti restart
+	br
+	echo "Панель управления Ajenti и Ajenti V были установлены. Теперь можете управлять сервером из браузера."
+	echo "Адрес: http://$ipext:8000"
+	echo "Логин: root"
+	echo "Пароль: admin"
+	br
+	wait
 }
 
 mtu_change()
 {
-ifconfig $1 mtu $2
-wait
+	ifconfig $1 mtu $2
+	wait
 }
+
 #Функция проверки установленного приложения, exist возвращает true если установлена и false, если нет.
 installed()
 {
-exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
-if [ -z $exist ]
+	exist=`whereis $1 | awk {'print $2'}` #вариант быстрый, но не всегда эффективный
+	if [ -z $exist ]
 	then #будем использовать оба варианта
-	exist=`rpm -qa $1` #вариант медленнее, но эффективнее
-fi
+		exist=`rpm -qa $1` #вариант медленнее, но эффективнее
+	fi
 
-if [ -n "$exist" ]
-then
-exist=true
-else
-exist=false
-fi
+	if [ -n "$exist" ]
+	then
+		exist=true
+	else
+		exist=false
+	fi
 }
 
 #функция которая открывает на редактирование файл в приоритете: mc, nano, vi
 edit()
 {
-installed mc
-if [ $exist == true ]; then mcedit  $1
+	installed mc
+	if [ $exist == true ]; then
+		mcedit  $1
   else
-  installed nano
-  if [ $exist == true ]; then nano  $1
-    else
-    vi $1
-  fi
-fi
+  	installed nano
+  	if [ $exist == true ]; then
+	  	nano $1
+		else
+	    vi $1
+  	fi
+	fi
 }
 
 #функция удаления.
 uninstall()
 {
-if [ $osver1 -eq 5 ]; then yum erase $1 $2 $3 $4 $5;
-else
-myinstall yum-remove-with-leaves | tee > null
-yum --remove-leaves remove $1 $2 $3 $4 $5
-fi
+	if [ $osver1 -eq 5 ]; then
+		yum erase $1 $2 $3 $4 $5;
+	else
+		myinstall yum-remove-with-leaves | tee > null
+		yum --remove-leaves remove $1 $2 $3 $4 $5
+	fi
 }
 
 #Определяем активный внешний интерфейс
 whatismyiface()
 {
-if [ $osver1 -eq 7 ]; then
-  installed ifconfig
-  if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
-fi
-if [ -n "$(ifconfig | grep eth0)" ]; then iface="eth0"
-else
-    if [ -n "$(ifconfig | grep venet0:0)" ]; then iface=venet0:0; fi
-fi
+	if [ $osver1 -eq 7 ]; then
+  	installed ifconfig
+  	if [ $exist == false ]; then
+  		yum -y install net-tools | tee > null;
+  	fi
+	fi
+	if [ -n "$(ifconfig | grep eth0)" ]; then
+		iface="eth0"
+	else
+    if [ -n "$(ifconfig | grep venet0:0)" ]; then
+    	iface=venet0:0;
+    fi
+	fi
 }
 
 #определяем ip на внешнем интерфейсе
 whatismyip()
 {
-whatismyiface
-case "$osver1" in
-4|5|6)
-ip=`ifconfig $iface | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
-;;
-7)
-installed ifconfig
-if [ $exist == false ]; then yum -y install net-tools | tee > null; fi
-ip=`ifconfig $iface | grep 'inet' | sed q | awk {'print $2'}`
-;;
-*)
-echo "Версия ОС неизвестна. Выходим."
-wait
-;;
-esac
+	whatismyiface
+	case "$osver1" in
+		4|5|6)
+			ip=`ifconfig $iface | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
+			;;
+		7)
+			installed ifconfig
+			if [ $exist == false ]; then
+				yum -y install net-tools | tee > null;
+			fi
+			ip=`ifconfig $iface | grep 'inet' | sed q | awk {'print $2'}`
+			;;
+		*)
+			echo "Версия ОС неизвестна. Выходим."
+			wait
+			;;
+	esac
 }
 
 #определяем внешний IP через запрос
 whatismyipext()
 {
-installed wget
-if [ $exist == false ]; then myinstall wget; fi
-ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
+	installed wget
+	if [ $exist == false ]; then
+		myinstall wget;
+	fi
+	ipext=`wget --no-check-certificate -qO- https://2ip.ru/index.php | grep "Ваш IP адрес:" | sed s/.*button\"\>// | sed s_"<"_" "_ | awk {'print $1'}`
 }
 
 whatismyip_full()
 {
-whatismyip
-echo "Ваш внешний IP: $ip?"
-myread_yn ans
-case "$ans" in
-  y|Y)
-  #ничего не делаем, выходим из case
-  ;;
-  n|N|т|Т)
-  echo "Если был неправильно определен IP, вы можете произвести настройку в ручном режиме."
-  echo "Для этого Вам нужно определить как называется Ваш сетевой интерфейс, через который Вы выходите в интернет."
-  echo "Если хотите вывести на экран все сетевые интерфейсы, чтобы определить какой из них внешний - нажмите 1."
-  myread ans
-  if [ "$ans" == "1" ]; then ifconfig; br; wait; fi
-  br
-  echo "Укажите название интерфейса, который имеет внешний IP (обычно eth0, venet0 или venet0:0)"
-  read int
-  ip=`ifconfig $int | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
-  #centOS7
-  if [ $osver1 -eq 7 ]; then ip=`ifconfig $int | grep 'inet' | sed q | awk {'print $2'}`; fi
-  echo "Ваш внешний IP: $ip?"
-  myread_yn ans
-  case "$ans" in
-    y|Y)
-    ;;
-    n|N|т|Т)
-    echo "Тогда введите IP вручную:"
-    read ip
-    ;;
-    *)
-    echo "Неправильный ответ. Выходим."
-    wait
-    sh $0
-    exit 0
-    ;;
-  esac
-  ;;
-  *)
-  echo "Неправильный ответ. Выходим."
-  wait
-  sh $0
-  exit 0
-  ;;
-esac
+	whatismyip
+	echo "Ваш внешний IP: $ip?"
+	myread_yn ans
+	case "$ans" in
+  	y|Y)
+  		#ничего не делаем, выходим из case
+  		;;
+  	n|N|т|Т)
+  		echo "Если был неправильно определен IP, вы можете произвести настройку в ручном режиме."
+  		echo "Для этого Вам нужно определить как называется Ваш сетевой интерфейс, через который Вы выходите в интернет."
+  		echo "Если хотите вывести на экран все сетевые интерфейсы, чтобы определить какой из них внешний - нажмите 1."
+  		myread ans
+  		if [ "$ans" == "1" ]; then
+  			ifconfig
+  			br
+  			wait
+  		fi
+  		br
+  		echo "Укажите название интерфейса, который имеет внешний IP (обычно eth0, venet0 или venet0:0)"
+  		read int
+  		ip=`ifconfig $int | grep 'inet addr' | awk {'print $2'} | sed s/.*://`
+  		#centOS7
+  		if [ $osver1 -eq 7 ]; then
+  			ip=`ifconfig $int | grep 'inet' | sed q | awk {'print $2'}`
+  		fi
+  		echo "Ваш внешний IP: $ip?"
+  		myread_yn ans
+  		case "$ans" in
+    		y|Y)
+    			;;
+    		n|N|т|Т)
+					echo "Тогда введите IP вручную:"
+					read ip
+					;;
+				*)
+					echo "Неправильный ответ. Выходим."
+					wait
+					sh $0
+					exit 0
+					;;
+			esac
+			;;
+		*)
+			echo "Неправильный ответ. Выходим."
+			wait
+			sh $0
+			exit 0
+			;;
+	esac
 }
 
 showinfo()
 {
-echo '┌──────────────────────┐'
-echo '│ Информация о системе │'
-echo '└──────────────────────┘'
-echo "CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
-if [ $swap_mb -eq 0 ]; then echo "RAM: $mem_mb Mb"; else
-echo "RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"; fi
-#Определяем диск (делаем это при каждом выводе, т.к. данные меняются)
-hdd_total=`df | awk '(NR == 2)' | awk '{print $2}'`
-let "hdd_total_mb=$hdd_total / 1024"
-hdd_free=`df | awk '(NR == 2)' | awk '{print $4}'`
-let "hdd_free_mb=$hdd_free / 1024"
-echo "HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
-echo "ОС: $osfamily $osver2"
-echo "Разрядность ОС: $arc bit"
-echo "Версия ядра Linux: $kern"
-echo "Ваш IP на интерфейсе $iface: $ip"
-echo "Ваш внешний IP определяется как: $ipext"
+	echo '┌──────────────────────┐'
+	echo '│ Информация о системе │'
+	echo '└──────────────────────┘'
+	echo "CPU: $cpu_cores x $cpu_clock MHz ($cpu_model)"
+	if [ $swap_mb -eq 0 ]; then
+		echo "RAM: $mem_mb Mb"
+	else
+		echo "RAM: $mem_mb Mb (Плюс swap $swap_mb Mb)"
+	fi
+	#Определяем диск (делаем это при каждом выводе, т.к. данные меняются)
+	hdd_total=`df | awk '(NR == 2)' | awk '{print $2}'`
+	let "hdd_total_mb=$hdd_total / 1024"
+	hdd_free=`df | awk '(NR == 2)' | awk '{print $4}'`
+	let "hdd_free_mb=$hdd_free / 1024"
+	echo "HDD: $hdd_total_mb Mb (свободно $hdd_free_mb Mb)"
+	echo "ОС: $osfamily $osver2"
+	echo "Разрядность ОС: $arc bit"
+	echo "Версия ядра Linux: $kern"
+	echo "Ваш IP на интерфейсе $iface: $ip"
+	echo "Ваш внешний IP определяется как: $ipext"
 }
 
 about()
 {
-echo "Данную утилиту написал Павел Евтихов (aka Brizovsky).
+	echo "Данную утилиту написал Павел Евтихов (aka Brizovsky).
 г. Екатеринбург, Россия.
 2016 год.
 "
