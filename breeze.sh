@@ -420,16 +420,17 @@ about()
 2016 год.
 "
 }
+
 changelog()
 {
-wget $updpath/changelog.txt -r -N -nd
-cat changelog.txt
-br
+	wget $updpath/changelog.txt -r -N -nd
+	cat changelog.txt
+	br
 }
 
 log()
 {
-changelog
+	changelog
 }
 
 #-----------------
@@ -439,18 +440,18 @@ changelog
 title_full_len=${#title_full}
 title_len=${#title}
 space=""
-      let "space_len=43-$title_full_len" 
-      while [ "${#space}" -le $space_len ]
-      do
-      space=$space" "
-      done
+let "space_len=43-$title_full_len" 
+while [ "${#space}" -le $space_len ]
+do
+	space=$space" "
+done
 
 space2=""
-      let "space2_len=30-$title_len" 
-      while [ "${#space2}" -le $space2_len ]
-      do
-      space2=$space2" "
-      done
+let "space2_len=30-$title_len" 
+while [ "${#space2}" -le $space2_len ]
+do
+	space2=$space2" "
+done
 
 filename='breeze.sh'
 updpath='http://evtikhov.ru/'
@@ -477,19 +478,24 @@ then
   osver2=$(cat /etc/redhat-release | awk {'print $3'})
 else
   if [ "$(cat /etc/redhat-release | awk {'print $3'})" == "release" ]
-    then
+  then
     osfamily=$(cat /etc/redhat-release | awk {'print $1'})" "$(cat /etc/redhat-release | awk {'print $2'})
     osver2=$(cat /etc/redhat-release | awk {'print $4'})
-  else osver2=0
+  else
+  	osver2=0
   fi
 fi
 osver1=`echo $osver2 | cut -c 1` #берём только первый символ от версии для определения поколения
-if [ "$osfamily" == "CentOS Linux" ]; then osfamily="CentOS"; fi
+if [ "$osfamily" == "CentOS Linux" ]; then
+	osfamily="CentOS";
+fi
 
 #Определяем разрядность ОС
 arc=`arch`
-if [ "$arc" == "x86_64" ]; then arc=64 #В теории возможно обозначение "IA-64" и "AMD64", но я не встречал
-else arc=32 #Чтобы не перебирать все возможные IA-32, x86, i686, i586 и т.д.
+if [ "$arc" == "x86_64" ]; then
+	arc=64 #В теории возможно обозначение "IA-64" и "AMD64", но я не встречал
+else
+	arc=32 #Чтобы не перебирать все возможные IA-32, x86, i686, i586 и т.д.
 fi 
 
 #определяем версию ядра Linux
@@ -727,964 +733,978 @@ chosen=0
 chosen2=0
 while [ "$repeat" = "true" ] #выводим меню, пока не надо выйти
 do
+	#пошёл вывод
+	if [ $chosen -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
+		menu
+		myread_dig pick
+	else
+		pick=$chosen
+	fi
 
-#пошёл вывод
-if [ $chosen -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
-menu
-myread_dig pick
-else
-pick=$chosen
-fi
-
-case "$pick" in
-1) #Информация о системе
-clear
-showinfo
-br
-echo "Вычисляем Ваш IP на интерфейсе..."
-whatismyip
-clear
-showinfo
-br
-echo "Вычисляем Ваш внешний IP..."
-whatismyipext
-clear
-showinfo
-br
-wait
-;;
-2) #Работа с ОС
-chosen=2
-clear
-if [ $chosen2 -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
-echo "$title"
-echo "$menu2"
-myread_dig pick
-else
-pick=$chosen2
-fi
-    case "$pick" in
-    1) #Добавить внешние репозитории
-      case "$osver1" in
-        4)
-        repo4
-        ;;
-        5)
-        repo5
-        ;;
-        6)
-        repo6
-        ;;
-        7)
-        repo7
-        ;;
-        0)
-        echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
-        echo "5) CentOS 5.x x64 (или другой дистрибутив на базе RHEL 5)"
-        echo "6) CentOS 6.x x64 (или другой дистрибутив на базе RHEL 6)"
-        echo "7) CentOS 7.x x64 (или другой дистрибутив на базе RHEL 7)"
-        echo "0) Любая другая ОС"
-        myread_dig osver_user
-        case "$osver_user" in
-          5)
-          repo5
-          ;;
-          6)
-          repo6
-          ;;
-          7)
-          repo7
-          ;;
-          0)
-          echo "Никакие другие ОС пока не поддерживаются. Но планируется расширение поддержки"
-          wait
-          ;;
-        esac
-        ;;
-        *) #по идее мы НИКОГДА не должны попасть сюда, исходя из того, как строится проверка
-        echo "Произошла непредвиденная ошибка при определении версии CentOS. Выходим."
-        exit 0
-        ;;
-      esac   
-    ;;
-    2) #Обновить ОС
-    echo "Начинаем обновление ОС..."
-    yum update -y
-    echo "ОС была успешно обновлена."
-    wait    
-    ;;
-    3) #Установить популярные приложения
-    echo "Сечас будут установлены следующие программы:"
-    echo "mc - Midnigh Commander (файловый менеджер)"
-    echo "htop (более продвинутый мониторинг ресурсов)"
-    echo "nano (простейший текстовый редактор)"
-    if [ $osver1 -ne 5 ]; then echo "аддон для yum, который позволяет удалять программы со всеми зависимостями"; fi #Не для CentOS 5
-    if [ $osver1 -eq 7 ]; then echo "net-tools (чтобы вернуть команду ifconfig)"; fi #Только для CentOS 7
-    br
-    wait
-    echo "Начинаем установку программ..."
-    yum -y install mc
-    yum -y install htop
-    yum -y install nano
-    if [ $osver1 -ne 5 ]; then yum -y install yum-remove-with-leaves; fi #Не для CentOS 5
-    if [ $osver1 -eq 7 ]; then yum -y install net-tools; fi #Только для CentOS 7
-    br
-    echo "Программы были установлены."
-    wait    
-    ;;
-    4) #Антивирус
-    chosen2=4
-    clear
-    echo "$title"
-    echo "$menu24"
-    myread_dig pick
-    case "$pick" in
-      1) #Установить Антивирус
-      echo "сейчас будет установлен антивирус ClamAV."
-      wait
-      yum -y install clamav clamd
-      br
-      echo "Антивирус был установлен. Сейчас обновим антивирусные базы"
-      br
-      freshclam
-      br
-      echo "Базы были обновлены."
-      br
-      echo "Сейчас мы попробуем запустить этот сервис (демон)."
-      chkconfig --levels 235 clamd on
-      service clamd restart
-      br
-      echo "Всё готово!"
-      wait
-      ;;
-      2) #Обновить антивирус
-      installed clamscan
-      if [ $exist == true ]; then
-        freshclam
-        br
-        wait
-      else
-        echo "У вас не установлен антивирус."
-      wait
-      fi
-      ;;
-      3) #Проверить папку на вирусы
-      installed clamscan
-      if [ $exist == true ]; then
-        echo 'Укажите папку, которую нужно просканировать (введите "/", если весь сервер):'
-        read scandir
-        echo "Нужно ли сохранить лог сканирования в файл?"
-        myread_yn avlog
-        case "$avlog" in
-         y|Y)
-           echo 'Укажите путь для сохранения лога сканирования (начиная с "/")'
-           read avlogdir
-           echo "Сканируем..."
-           br
-           clamscan $scandir -r -i --log=$avlogdir
-         ;;
-         n|N|т|Т)
-         echo "Сканируем..."
-         br
-         clamscan $scandir -r
-         ;;
-         *)
-         echo "Неправильный выбор"
-         wait
-         ;;
-        esac
-      br
-      wait
-      else
-        echo "У вас не установлен антивирус."
-        wait
-      fi
-      ;;
-      4) #Удалить антивирус
-      uninstall clamav*
-      br
-      wait
-      ;;
-      0)
-      chosen2=0
-      ;;
-    esac
-    ;;
-    5) #Firewall (iptables)
-    chosen2=5
-    clear
-    echo "$title"
-    echo "$menu25"
-    myread_dig pick
-    case "$pick" in
-      1) #Включить firewall (помощник настройки)
-      clear
-      echo "Сейчас будут удалены все правила iptables (если они были), установлен запрет"
-      echo "на обработку всех входящих и исходящих пакетов, кроме внутреннего обмена"
-      echo "пакетами (localhost), SSH-подключения (22 порт) и всех связанных пакетов"
-      echo "(состояние RELATED и ESTABLISHED). А далее вам будет предложен вариант открыть"
-      echo "самые распространенные порты (с вашего разрешения). Продолжить?"
-      myread_yn ans
-      case "$ans" in
-        y|Y)
-        echo "Начинаем настройку iptables"
-		#Проверка на CentOS 7
-        if [ $osver1 -eq 7 ]; then 
-        systemctl stop firewalld
-		systemctl mask firewalld
-		myinstall iptables-services | tee > null
-		systemctl enable iptables
-        fi
-        iptables -F
-        iptables -X
-        iptables -A INPUT -i lo -j ACCEPT
-        iptables -A OUTPUT -o lo -j ACCEPT
-        iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-        iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
-        iptables -P INPUT DROP
-        iptables -P OUTPUT DROP
-        iptables -P FORWARD DROP
-        iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-        iptables -A OUTPUT -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-        br
-        echo "Готово. Хотите, чтобы этот компьютер пинговался с других компьютеров?"
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          iptables -A INPUT -p icmp --icmp-type 0 -j ACCEPT
-          iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
-          iptables -A OUTPUT -p icmp -j ACCEPT
-          ;;
-        esac
-        br
-        echo "Часто люди на серверах открывают следующие порты:"
-        echo "web: 80, 443"
-        echo "ftp: 21"
-        echo "ntp: 123 (для синхронизации часов)"
-        echo "dns: 54"
-        echo "Хотите открыть их сейчас?"
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          iptables -A INPUT -p tcp --dport 21 -j ACCEPT
-          iptables -A OUTPUT -p tcp --dport 21 -j ACCEPT
-          iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
-          iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-          iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
-          iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
-          iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-          iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
-          iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
-          iptables -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
-          iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
-          ;;
-        esac
-        br
-        echo "Хотите открыть порт 3128 для Proxy?"
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          iptables -A INPUT -p tcp --dport 3128 -j ACCEPT
-          ;;
-        esac
-        br
-        echo "Хотите открыть порты для VPN-сервера (PPTP)?"
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          whatismyip_full
-          iptables -A INPUT -p 47 -j ACCEPT
-          iptables -A OUTPUT -p 47 -j ACCEPT
-          iptables -A INPUT -p tcp --dport 1723 -j ACCEPT
-          iptables -A OUTPUT -p tcp --sport 1723 -j ACCEPT
-          iptables -t nat -I POSTROUTING -j SNAT --to $ip
-          iptables -A FORWARD -s 10.1.0.0/24 -j ACCEPT
-          iptables -A FORWARD -d 10.1.0.0/24 -j ACCEPT
-          ;;
-        esac
-        iptables_save
-        br
-        echo "Firewall был настроен. Остальные порты вы можете открыть самостоятельно,"
-        echo 'воспользовавшись разделом "Открыть порт в iptables".'
-        wait
-        ;;
-      esac
-      ;;
-      2) #Выключить firewall (рарешить все подключения)
-	  echo "Сейчас будут удалены все правила iptables, после чего будут разрешены все подключения. Продолжить?"
-      myread_yn ans
-      case "$ans" in
-        y|Y)
-        iptables -F
-        iptables -X
-        iptables -P INPUT ACCEPT
-        iptables -P FORWARD ACCEPT
-        iptables -P OUTPUT ACCEPT
-        ;;
-      esac
-      iptables_save
-      br
-      echo "Готово. Iptables продолжает работать, но в нём разрешены все подключения."
-      wait
-      ;;
-      3) #Временно выключить firewall
-      iptables -F
-      iptables -X
-      iptables -P INPUT ACCEPT
-      iptables -P FORWARD ACCEPT
-      iptables -P OUTPUT ACCEPT
-      br
-      echo "Готово. Были временно сброшены все правила для iptables. Сейчас проходят все"
-      echo "подключения. После перезагрузки сервера или перезапуска iptables всё будет"
-      echo "как прежде (применятся все правила, которые были до этого)."
-      br
-      wait
-      ;;
-      4) #Перезапустить firewall
-      if [ $osver1 -eq 7 ]; then 
-	  myinstall iptables-services | tee > null
-      fi
-      service iptables restart
-      br
-      echo "Готово. "
-      wait
-      ;;
-      5) #Открыть порт в iptables
-      echo "Укажите в какую сторону вы хотите открыть порт:"
-      echo "1) Входящие соединения (чтобы к этому серверу можно было подключиться по заданному порту)"
-      echo "2) Исходящие соединения (чтобы этот сервер мог подключиться к другим компьютерам по заданному порту)"
-      myread_dig taffic_type
-      case "$taffic_type" in
-      1)
-      taffic_type=in
-      ;;
-      2)
-      taffic_type=out
-      ;;
-      *)
-      echo "Неправильный выбор. Аварийный выход."
-      wait
-      exit
-      ;;
-      esac
-      br
-      echo "Укажите какой порт вы хотите открыть:"
-      read port
-      br
-      echo "Выберите протокол, по которому его нужно открыть:"
-      echo "1) TCP"
-      echo "2) UDP"
-      echo "3) TCP и UDP"
-      myread_dig protocol
-      case "$protocol" in
-		1)
-		openport $taffic_type tcp $port
-		;;
-		2)
-		openport $taffic_type udp $port
-		;;
-		3)
-		openport $taffic_type tcp $port
-		openport $taffic_type udp $port
-		;;
-		*)
-		echo "Неправильный выбор."
-		;;
-      esac
-      br
-      echo "Готово."
-      wait
-      ;;
-      6) #Посмотреть текущую политику firewall
-      iptables -nvL
-      br
-      wait
-      ;;
-      7) #Сохранить текущие правила firewall
-      iptables_save
-      br
-      echo "Готово."
-      wait
-      ;;
-      0)
-      chosen2=0
-      ;;
-    esac
-    ;;
-    6) #Планировщик задач (cron)
-    chosen2=6
-    clear
-    echo "$title"
-    echo "$menu26"
-	myread_dig pick
-    case "$pick" in
-		1) #Проверить запущен ли планировщик (cron)
-		if [[ -n $(service crond status | grep "is running") ]]; then
-			echo "Планировщик Cron работает..."
+	case "$pick" in
+		1) #Информация о системе
+			clear
+			showinfo
+			br
+			echo "Вычисляем Ваш IP на интерфейсе..."
+			whatismyip
+			clear
+			showinfo
+			br
+			echo "Вычисляем Ваш внешний IP..."
+			whatismyipext
+			clear
+			showinfo
+			br
 			wait
-		else
-			echo "Планировщик Cron в данный момент не запущен. Попробовать запустить?"
+			;;
+		2) #Работа с ОС
+			chosen=2
+			clear
+			if [ $chosen2 -eq 0 ]; then #выводим меню, только если ещё никуда не заходили
+				echo "$title"
+				echo "$menu2"
+				myread_dig pick
+			else
+				pick=$chosen2
+			fi
+			case "$pick" in
+				1) #Добавить внешние репозитории
+					case "$osver1" in
+						4)
+							repo4
+							;;
+						5)
+							repo5
+							;;
+						6)
+							repo6
+							;;
+						7)
+							repo7
+							;;
+						0)
+							echo "Мы не смогли определить версию Вашей ОС, но Вы можете выбрать её сами на свой страх и риск:"
+							echo "5) CentOS 5.x x64 (или другой дистрибутив на базе RHEL 5)"
+							echo "6) CentOS 6.x x64 (или другой дистрибутив на базе RHEL 6)"
+							echo "7) CentOS 7.x x64 (или другой дистрибутив на базе RHEL 7)"
+							echo "0) Любая другая ОС"
+							myread_dig osver_user
+							case "$osver_user" in
+								5)
+									repo5
+									;;
+								6)
+									repo6
+									;;
+								7)
+									repo7
+									;;
+								0)
+									echo "Никакие другие ОС пока не поддерживаются. Но планируется расширение поддержки"
+									wait
+									;;
+							esac
+							;;
+						*) #по идее мы НИКОГДА не должны попасть сюда, исходя из того, как строится проверка
+							echo "Произошла непредвиденная ошибка при определении версии CentOS. Выходим."
+							exit 0
+							;;
+					esac
+					;;
+				2) #Обновить ОС
+					echo "Начинаем обновление ОС..."
+					yum update -y
+					echo "ОС была успешно обновлена."
+					wait
+					;;
+				3) #Установить популярные приложения
+					echo "Сечас будут установлены следующие программы:"
+					echo "mc - Midnigh Commander (файловый менеджер)"
+					echo "htop (более продвинутый мониторинг ресурсов)"
+					echo "nano (простейший текстовый редактор)"
+					if [ $osver1 -ne 5 ]; then
+						echo "аддон для yum, который позволяет удалять программы со всеми зависимостями" #Не для CentOS 5
+					fi
+					if [ $osver1 -eq 7 ]; then
+						echo "net-tools (чтобы вернуть команду ifconfig)" #Только для CentOS 7
+					fi
+					br
+					wait
+					echo "Начинаем установку программ..."
+					yum -y install mc
+					yum -y install htop
+					yum -y install nano
+					if [ $osver1 -ne 5 ]; then
+						yum -y install yum-remove-with-leaves #Не для CentOS 5
+					fi
+					if [ $osver1 -eq 7 ]; then
+						yum -y install net-tools #Только для CentOS 7
+					fi
+					br
+					echo "Программы были установлены."
+					wait
+					;;
+				4) #Антивирус
+					chosen2=4
+					clear
+					echo "$title"
+					echo "$menu24"
+					myread_dig pick
+					case "$pick" in
+						1) #Установить Антивирус
+							echo "сейчас будет установлен антивирус ClamAV."
+							wait
+							yum -y install clamav clamd
+							br
+							echo "Антивирус был установлен. Сейчас обновим антивирусные базы"
+							br
+							freshclam
+							br
+							echo "Базы были обновлены."
+							br
+							echo "Сейчас мы попробуем запустить этот сервис (демон)."
+							chkconfig --levels 235 clamd on
+							service clamd restart
+							br
+							echo "Всё готово!"
+							wait
+							;;
+						2) #Обновить антивирус
+							installed clamscan
+							if [ $exist == true ]; then
+								freshclam
+								br
+								wait
+							else
+								echo "У вас не установлен антивирус."
+							wait
+							fi
+							;;
+						3) #Проверить папку на вирусы
+							installed clamscan
+							if [ $exist == true ]; then
+								echo 'Укажите папку, которую нужно просканировать (введите "/", если весь сервер):'
+								read scandir
+								echo "Нужно ли сохранить лог сканирования в файл?"
+								myread_yn avlog
+								case "$avlog" in
+									y|Y)
+										echo 'Укажите путь для сохранения лога сканирования (начиная с "/")'
+										read avlogdir
+										echo "Сканируем..."
+										br
+										clamscan $scandir -r -i --log=$avlogdir
+										;;
+									n|N|т|Т)
+										echo "Сканируем..."
+										br
+										clamscan $scandir -r
+										;;
+									*)
+										echo "Неправильный выбор"
+										wait
+										;;
+								esac
+								br
+								wait
+							else
+								echo "У вас не установлен антивирус."
+								wait
+							fi
+							;;
+						4) #Удалить антивирус
+							uninstall clamav*
+							br
+							wait
+							;;
+						0)
+							chosen2=0
+							;;
+					esac
+					;;
+				5) #Firewall (iptables)
+					chosen2=5
+					clear
+					echo "$title"
+					echo "$menu25"
+					myread_dig pick
+					case "$pick" in
+						1) #Включить firewall (помощник настройки)
+							clear
+							echo "Сейчас будут удалены все правила iptables (если они были), установлен запрет"
+							echo "на обработку всех входящих и исходящих пакетов, кроме внутреннего обмена"
+							echo "пакетами (localhost), SSH-подключения (22 порт) и всех связанных пакетов"
+							echo "(состояние RELATED и ESTABLISHED). А далее вам будет предложен вариант открыть"
+							echo "самые распространенные порты (с вашего разрешения). Продолжить?"
+							myread_yn ans
+							case "$ans" in
+								y|Y)
+									echo "Начинаем настройку iptables"
+									#Проверка на CentOS 7
+									if [ $osver1 -eq 7 ]; then
+										systemctl stop firewalld
+										systemctl mask firewalld
+										myinstall iptables-services | tee > null
+										systemctl enable iptables
+									fi
+									iptables -F
+									iptables -X
+									iptables -A INPUT -i lo -j ACCEPT
+									iptables -A OUTPUT -o lo -j ACCEPT
+									iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+									iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+									iptables -P INPUT DROP
+									iptables -P OUTPUT DROP
+									iptables -P FORWARD DROP
+									iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+									iptables -A OUTPUT -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
+									br
+									echo "Готово. Хотите, чтобы этот компьютер пинговался с других компьютеров?"
+									myread_yn ans
+									case "$ans" in
+										y|Y)
+											iptables -A INPUT -p icmp --icmp-type 0 -j ACCEPT
+											iptables -A INPUT -p icmp --icmp-type 8 -j ACCEPT
+											iptables -A OUTPUT -p icmp -j ACCEPT
+											;;
+									esac
+									br
+									echo "Часто люди на серверах открывают следующие порты:"
+									echo "web: 80, 443"
+									echo "ftp: 21"
+									echo "ntp: 123 (для синхронизации часов)"
+									echo "dns: 54"
+									echo "Хотите открыть их сейчас?"
+									myread_yn ans
+								case "$ans" in
+									y|Y)
+										iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+										iptables -A OUTPUT -p tcp --dport 21 -j ACCEPT
+										iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
+										iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+										iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+										iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
+										iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+										iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
+										iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
+										iptables -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+										iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
+										;;
+								esac
+								br
+								echo "Хотите открыть порт 3128 для Proxy?"
+								myread_yn ans
+								case "$ans" in
+									y|Y)
+										iptables -A INPUT -p tcp --dport 3128 -j ACCEPT
+										;;
+								esac
+								br
+								echo "Хотите открыть порты для VPN-сервера (PPTP)?"
+								myread_yn ans
+								case "$ans" in
+									y|Y)
+										whatismyip_full
+										iptables -A INPUT -p 47 -j ACCEPT
+										iptables -A OUTPUT -p 47 -j ACCEPT
+										iptables -A INPUT -p tcp --dport 1723 -j ACCEPT
+										iptables -A OUTPUT -p tcp --sport 1723 -j ACCEPT
+										iptables -t nat -I POSTROUTING -j SNAT --to $ip
+										iptables -A FORWARD -s 10.1.0.0/24 -j ACCEPT
+										iptables -A FORWARD -d 10.1.0.0/24 -j ACCEPT
+										;;
+								esac
+								iptables_save
+								br
+								echo "Firewall был настроен. Остальные порты вы можете открыть самостоятельно,"
+								echo 'воспользовавшись разделом "Открыть порт в iptables".'
+								wait
+								;;
+						esac
+						;;
+					2) #Выключить firewall (рарешить все подключения)
+						echo "Сейчас будут удалены все правила iptables, после чего будут разрешены все подключения. Продолжить?"
+						myread_yn ans
+						case "$ans" in
+							y|Y)
+								iptables -F
+								iptables -X
+								iptables -P INPUT ACCEPT
+								iptables -P FORWARD ACCEPT
+								iptables -P OUTPUT ACCEPT
+								;;
+						esac
+						iptables_save
+						br
+						echo "Готово. Iptables продолжает работать, но в нём разрешены все подключения."
+						wait
+						;;
+					3) #Временно выключить firewall
+						iptables -F
+						iptables -X
+						iptables -P INPUT ACCEPT
+						iptables -P FORWARD ACCEPT
+						iptables -P OUTPUT ACCEPT
+						br
+						echo "Готово. Были временно сброшены все правила для iptables. Сейчас проходят все"
+						echo "подключения. После перезагрузки сервера или перезапуска iptables всё будет"
+						echo "как прежде (применятся все правила, которые были до этого)."
+						br
+						wait
+						;;
+					4) #Перезапустить firewall
+						if [ $osver1 -eq 7 ]; then 
+							myinstall iptables-services | tee > null
+						fi
+						service iptables restart
+						br
+						echo "Готово. "
+						wait
+						;;
+					5) #Открыть порт в iptables
+						echo "Укажите в какую сторону вы хотите открыть порт:"
+						echo "1) Входящие соединения (чтобы к этому серверу можно было подключиться по заданному порту)"
+						echo "2) Исходящие соединения (чтобы этот сервер мог подключиться к другим компьютерам по заданному порту)"
+						myread_dig taffic_type
+						case "$taffic_type" in
+							1)
+								taffic_type=in
+								;;
+							2)
+								taffic_type=out
+								;;
+							*)
+								echo "Неправильный выбор. Аварийный выход."
+								wait
+								exit
+								;;
+						esac
+						br
+						echo "Укажите какой порт вы хотите открыть:"
+						read port
+						br
+						echo "Выберите протокол, по которому его нужно открыть:"
+						echo "1) TCP"
+						echo "2) UDP"
+						echo "3) TCP и UDP"
+						myread_dig protocol
+						case "$protocol" in
+							1)
+								openport $taffic_type tcp $port
+								;;
+							2)
+								openport $taffic_type udp $port
+								;;
+							3)
+								openport $taffic_type tcp $port
+								openport $taffic_type udp $port
+								;;
+							*)
+								echo "Неправильный выбор."
+								;;
+						esac
+						br
+						echo "Готово."
+						wait
+						;;
+					6) #Посмотреть текущую политику firewall
+						iptables -nvL
+						br
+						wait
+						;;
+					7) #Сохранить текущие правила firewall
+						iptables_save
+						br
+						echo "Готово."
+						wait
+						;;
+					0)
+						chosen2=0
+						;;
+				esac
+				;;
+			6) #Планировщик задач (cron)
+				chosen2=6
+				clear
+				echo "$title"
+				echo "$menu26"
+				myread_dig pick
+				case "$pick" in
+					1) #Проверить запущен ли планировщик (cron)
+						if [[ -n $(service crond status | grep "is running") ]]; then
+							echo "Планировщик Cron работает..."
+							wait
+						else
+							echo "Планировщик Cron в данный момент не запущен. Попробовать запустить?"
+							myread_yn pick
+							case "$pick" in
+								y|Y)
+									service crond start
+									br
+									echo "Готово. Хотите добавить Cron в автозагрузку, чтобы он запускался после каждой перезагрузки?"
+									myread_yn pick
+									case "$pick" in
+										y|Y)
+											echo "Добавляем..."
+											chkconfig crond on
+											echo "Готово."
+											br
+											wait
+											;;
+									esac
+									;;
+							esac
+						fi
+						;;
+					2) #Перезапустить cron
+						service crond restart
+						br
+						wait
+						;;
+					3) #Добавить задание в планировщик (cron)
+						clear
+						echo "Введите команду, которую должен выполнять планировщик:"
+						read cron_task
+						br
+						echo "Выберите интервал, с которым должна выполняться эта задача:"
+						echo "1) При каждой загрузке системы"
+						echo "2) Один или несколько раз в час"
+						echo "3) Один или несколько раз в день"
+						echo "4) Один раз в неделю"
+						echo "5) Один раз в месяц"
+						echo "0) Не нужно выполнять, я передумал"
+						myread_dig pick
+						case "$pick" in
+							1)
+								echo "@reboot $cron_task" >> /var/spool/cron/$(whoami)
+								echo "Готово. Задание будет выполняться после каждой загрузки системы."
+								;;
+							2)
+								br
+								echo "Выберите интервал"
+								echo "1) Каждый час"
+								echo "2) Два раза в час (каждые 30 минут)"
+								echo "3) Три раза в час (каждые 20 минут)"
+								echo "4) Четыре раза в час (каждые 15 минут)"
+								echo "5) Шесть раз в час (каждые 10 минут)"
+								echo "6) Двенадцать раз в час (каждые 5 минут)"
+								echo "7) Тридцать раз в час (каждые 2 минуты)"
+								echo "8) Шестьдесят раз в час (каждую минуту)"
+								echo "0) Не нужно выполнять, я передумал"
+								myread_dig pick
+								case "$pick" in
+									1)
+										echo "0 * * * * $cron_task" >> /var/spool/cron/$(whoami) # @hourly
+										echo "Готово. Задание будет выполняться в 0 минут каждого часа."
+										;;
+									2)
+										echo "*/30 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 30 минут"
+										;;
+									3)
+										echo "*/20 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 20 минут"
+										;;
+									4)
+										echo "*/15 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 15 минут"
+										;;
+									5)
+										echo "*/10 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 10 минут"
+										;;
+									6)
+										echo "*/5 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 5 минут"
+										;;
+									7)
+										echo "*/2 * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 2 минуты"
+										;;
+									8)
+										echo "* * * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждую минуту"
+										;;
+									0)
+										;;
+									*)
+										echo "Неправильный выбор..."
+										;;
+								esac
+								;;
+							3)
+								br
+								echo "Выберите интервал"
+								echo "1) Каждый день (можно выбрать в какой час)"
+								echo "2) Два раза в день (каждые 12 часов)"
+								echo "3) Три раза в день (каждые 8 часов)"
+								echo "4) Четыре раза в день (каждые 6 часов)"
+								echo "5) Шесть раз в день (каждые 4 часа)"
+								echo "6) Двенадцать раз в день (каждые 2 часа)"
+								echo "0) Не нужно выполнять, я передумал"
+								myread_dig pick
+								case "$pick" in
+									1)
+										br
+										echo "Укажите в какой час запускать задание (0-23)"
+										read temp
+										let temp2=$temp+0
+										if [[ $temp2 -gt 0 && $temp2 -le 23 ]]; then #введён правильно
+											echo "0 $temp * * * $cron_task" >> /var/spool/cron/$(whoami)
+											echo "Готово. Задание будет выполняться каждый $temp-й час"
+										else #возможно введён неправильно
+											if [[ "$temp" = "0" ]]; then #всё-таки введён правильно
+												echo "0 $temp * * * $cron_task" >> /var/spool/cron/$(whoami)
+												echo "Готово. Задание будет выполняться каждый $temp-й час"
+											else #точно введён неправильно
+												echo "Неправильно указали час"
+											fi
+										fi
+										;;
+									2)
+										echo "0 */12 * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 12 часов"
+										;;
+									3)
+										echo "0 */8 * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 8 часов"
+										;;
+									4)
+										echo "0 */6 * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 6 часов"
+										;;
+									5)
+										echo "0 */4 * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 4 часа"
+										;;
+									6)
+										echo "0 */2 * * * $cron_task" >> /var/spool/cron/$(whoami)
+										echo "Готово. Задание будет выполняться каждые 2 часа"
+										;;
+									0)
+										;;
+									*)
+										echo "Неправильный выбор..."
+										;;
+								esac
+								;;
+							4)
+								br
+								echo "Выберите день недели, в который надо запускать задание"
+								echo "1) Понедельник"
+								echo "2) Вторник"
+								echo "3) Среда"
+								echo "4) Четверг"
+								echo "5) Пятница"
+								echo "6) Суббота"
+								echo "7) Воскресенье"
+								echo "0) Не нужно выполнять, я передумал"
+								myread_dig pick
+								case "$pick" in
+									1|2|3|4|5|6|7)
+										echo "0 4 * * $pick $cron_task" >> /var/spool/cron/$(whoami)
+										case "$pick" in
+											1)
+												day="каждый понедельник"
+												;;
+											2)
+												day="каждый вторник"
+												;;
+											3)
+												day="каждую среду"
+												;;
+											4)
+												day="каждый четверг"
+												;;
+											5)
+												day="каждую пятницу"
+												;;
+											6)
+												day="каждую субботу"
+												;;
+											7)
+												day="каждое воскресенье"
+												;;
+										esac
+										echo "Готово. Задание будет выполняться $day в 4 часа утра."
+										;;
+									0)
+										;;
+									*)
+										echo "Неправильный выбор..."
+										;;
+								esac
+								;;
+							5)
+								br
+								echo "Укажите в какой день месяца запускать задание"
+								read temp
+								let temp=$temp+0
+								if [[ $temp -gt 0 && $temp -le 31 ]]; then #введён правильно
+									echo "0 4 $temp * * $cron_task" >> /var/spool/cron/$(whoami)
+									echo "Готово. Задание будет выполняться каждое $temp-ое часло каждого месяца в 4 часа утра."
+								else # введён неправильно
+									echo "Неправильно выбрано число"
+								fi
+								;;
+							0)
+								;;
+							*)
+								echo "Неправильный выбор..."
+								;;
+						esac
+						service crond reload  | tee > null
+						br
+						wait
+						;;
+					4) #Открыть файл с заданиями cron
+						edit /var/spool/cron/$(whoami)
+						;;
+					5) #Выключить планировщик (cron)
+						echo "Планировщик не рекомендуется отключать. Вы уверены что хотите отключить его?"
+						myread_yn pick
+						case "$pick" in
+							y|Y)
+								br
+								service crond stop
+								br
+								echo "Планировщик был выключен. Если он стоял в автозагрузке, то он вновь будет запущен после перезагрузки системы"
+								br
+								wait
+								;;
+						esac
+						;;
+					0) #Выйти на уровень вверх
+						chosen2=0
+						;;
+				esac
+				;;
+			7) #Установить часовой пояс
+				clear
+				echo "$title"
+				echo "$menu27"
+				echo "Текущее время на этом компьютере: $(date +%H:%M). Выберите часовой пояс, который хотите установить."
+				myread_dig pick
+				case "$pick" in
+				1)
+					settimezone Europe Kaliningrad
+					;;
+				2)
+					settimezone Europe Moscow
+					;;
+				3)
+					settimezone Europe Samara
+					;;
+				4)
+					settimezone Asia Yekaterinburg
+					;;
+				5)
+					settimezone Asia Novosibirsk
+					;;
+				6)
+					settimezone Asia Krasnoyarsk
+					;;
+				7)
+					settimezone Asia Irkutsk
+					;;
+				8)
+					settimezone Asia Vladivostok
+					;;
+				9)
+					settimezone Asia Kamchatka
+					;;
+				0)
+					;;
+				*)
+					echo "Неправильный выбор."
+					wait
+			esac
+			;;
+		8) #Сменить пароль текущего пользователя
+			passwd
+			br
+			wait
+			;;
+		0)
+			chosen=0
+			;;
+		*)
+			echo "Неправильный выбор"
+			wait
+			;;
+	esac
+	;;
+3) #Установить панель управления хостингом
+	chosen=3
+	clear
+	echo "$title"
+	echo "$menu3"
+	myread_dig pick
+	case "$pick" in
+		1) #ISPmanager 4
+			clear
+			echo 'Панель управления "ISPManager 4"'
+			echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
+			echo 'Системные требования: минимальные не определены'
+			echo 'Лицензия: Панель управления ПЛАТНАЯ! Без лицензии, активированной на ваш IP даже не установится.'
+			echo 'Язык: Русский'
+			echo 'Хотите установить?'
 			myread_yn pick
 			case "$pick" in
 				y|Y)
-				service crond start
-				br
-				echo "Готово. Хотите добавить Cron в автозагрузку, чтобы он запускался после каждой перезагрузки?"
-				myread_yn pick
-				case "$pick" in
-					y|Y)
-					echo "Добавляем..."
-					chkconfig crond on
-					echo "Готово."
-					br
-					wait
+					wget "http://download.ispsystem.com/install.4.sh" -r -N -nd
+					sh install.4.sh
+					rm -f install.4.sh
 					;;
-				esac	
-				;;
-			esac
-		fi
-		;;
-		2) #Перезапустить cron
-		service crond restart
-		br
-		wait
-		;;
-		3) #Добавить задание в планировщик (cron)
-		clear
-		echo "Введите команду, которую должен выполнять планировщик:"
-		read cron_task
-		br
-		echo "Выберите интервал, с которым должна выполняться эта задача:"
-		echo "1) При каждой загрузке системы"
-		echo "2) Один или несколько раз в час"
-		echo "3) Один или несколько раз в день"
-		echo "4) Один раз в неделю"
-		echo "5) Один раз в месяц"
-		echo "0) Не нужно выполнять, я передумал"
-		myread_dig pick
-		case "$pick" in
-			1)
-			echo "@reboot $cron_task" >> /var/spool/cron/$(whoami)
-			echo "Готово. Задание будет выполняться после каждой загрузки системы."
-			;;
-			2)
-			br
-			echo "Выберите интервал"
-			echo "1) Каждый час"
-			echo "2) Два раза в час (каждые 30 минут)"
-			echo "3) Три раза в час (каждые 20 минут)"
-			echo "4) Четыре раза в час (каждые 15 минут)"
-			echo "5) Шесть раз в час (каждые 10 минут)"
-			echo "6) Двенадцать раз в час (каждые 5 минут)"
-			echo "7) Тридцать раз в час (каждые 2 минуты)"
-			echo "8) Шестьдесят раз в час (каждую минуту)"
-			echo "0) Не нужно выполнять, я передумал"
-			myread_dig pick
-			case "$pick" in
-				1)
-				echo "0 * * * * $cron_task" >> /var/spool/cron/$(whoami) # @hourly
-				echo "Готово. Задание будет выполняться в 0 минут каждого часа."
-				;;
-				2)
-				echo "*/30 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 30 минут"					
-				;;
-				3)
-				echo "*/20 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 20 минут"				
-				;;
-				4)
-				echo "*/15 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 15 минут"				
-				;;
-				5)
-				echo "*/10 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 10 минут"				
-				;;
-				6)
-				echo "*/5 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 5 минут"				
-				;;
-				7)
-				echo "*/2 * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 2 минуты"				
-				;;
-				8)
-				echo "* * * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждую минуту"				
-				;;
-				0)
-				;;
-				*)
-				echo "Неправильный выбор..."
-				;;				
 			esac
 			;;
-			3)
-			br
-			echo "Выберите интервал"
-			echo "1) Каждый день (можно выбрать в какой час)"
-			echo "2) Два раза в день (каждые 12 часов)"
-			echo "3) Три раза в день (каждые 8 часов)"
-			echo "4) Четыре раза в день (каждые 6 часов)"
-			echo "5) Шесть раз в день (каждые 4 часа)"
-			echo "6) Двенадцать раз в день (каждые 2 часа)"
-			echo "0) Не нужно выполнять, я передумал"
-			myread_dig pick
-			case "$pick" in
-				1)
-				br
-				echo "Укажите в какой час запускать задание (0-23)"
-				read temp
-				let temp2=$temp+0
-				if [[ $temp2 -gt 0 && $temp2 -le 23 ]]; then #введён правильно
-					echo "0 $temp * * * $cron_task" >> /var/spool/cron/$(whoami)
-					echo "Готово. Задание будет выполняться каждый $temp-й час"
-				else #возможно введён неправильно
-					if [[ "$temp" = "0" ]]; then #всё-таки введён правильно
-						echo "0 $temp * * * $cron_task" >> /var/spool/cron/$(whoami)
-						echo "Готово. Задание будет выполняться каждый $temp-й час"
-					else #точно введён неправильно
-						echo "Неправильно указали час"
-					fi
-				fi
-				;;
-				2)
-				echo "0 */12 * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 12 часов"					
-				;;
-				3)
-				echo "0 */8 * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 8 часов"					
-				;;
-				4)
-				echo "0 */6 * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 6 часов"					
-				;;
-				5)
-				echo "0 */4 * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 4 часа"					
-				;;
-				6)
-				echo "0 */2 * * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждые 2 часа"					
-				;;
-				0)
-				;;
-				*)
-				echo "Неправильный выбор..."
-				;;	
-			esac
-			;;
-			4)
-			br
-			echo "Выберите день недели, в который надо запускать задание"
-			echo "1) Понедельник"
-			echo "2) Вторник"
-			echo "3) Среда"
-			echo "4) Четверг"
-			echo "5) Пятница"
-			echo "6) Суббота"
-			echo "7) Воскресенье"
-			echo "0) Не нужно выполнять, я передумал"
-			myread_dig pick
-			case "$pick" in
-				1|2|3|4|5|6|7)
-				echo "0 4 * * $pick $cron_task" >> /var/spool/cron/$(whoami)
-				case "$pick" in
-					1) day="каждый понедельник"
-					;;
-					2) day="каждый вторник"
-					;;
-					3) day="каждую среду"
-					;;
-					4) day="каждый четверг"
-					;;
-					5) day="каждую пятницу"
-					;;
-					6) day="каждую субботу"
-					;;
-					7) day="каждое воскресенье"
-					;;
-				esac
-				echo "Готово. Задание будет выполняться $day в 4 часа утра."
-				;;
-				0)
-				;;
-				*)
-				echo "Неправильный выбор..."
-				;;
-			esac
-			;;
-			5)
-			br
-			echo "Укажите в какой день месяца запускать задание"
-			read temp
-			let temp=$temp+0
-			if [[ $temp -gt 0 && $temp -le 31 ]]; then #введён правильно
-				echo "0 4 $temp * * $cron_task" >> /var/spool/cron/$(whoami)
-				echo "Готово. Задание будет выполняться каждое $temp-ое часло каждого месяца в 4 часа утра."
-			else # введён неправильно
-				echo "Неправильно выбрано число"
-			fi
-			;;
-			0)
-			;;
-			*)
-			echo "Неправильный выбор..."
-			;;
-		esac
-		service crond reload  | tee > null
-		br
-		wait
-		;;
-		4) #Открыть файл с заданиями cron
-		edit /var/spool/cron/$(whoami)
-		;;
-		5) #Выключить планировщик (cron)
-		echo "Планировщик не рекомендуется отключать. Вы уверены что хотите отключить его?"
-		myread_yn pick
-		case "$pick" in
-			y|Y)
-			br
-			service crond stop
-			br
-			echo "Планировщик был выключен. Если он стоял в автозагрузке, то он вновь будет запущен после перезагрузки системы"
-			br
-			wait
-			;;
-		esac
-		;;
-		0) #Выйти на уровень вверх
-		chosen2=0
-		;;
-	esac	
-    ;;
-    7) #Установить часовой пояс
-    clear
-    echo "$title"
-    echo "$menu27"
-    echo "Текущее время на этом компьютере: $(date +%H:%M). Выберите часовой пояс, который хотите установить."
-    myread_dig pick
-        case "$pick" in
-        1)
-        settimezone Europe Kaliningrad
-        ;;
-        2)
-        settimezone Europe Moscow
-        ;;
-        3)
-        settimezone Europe Samara
-        ;;
-        4)
-        settimezone Asia Yekaterinburg
-        ;;
-        5)
-        settimezone Asia Novosibirsk
-        ;;
-        6)
-        settimezone Asia Krasnoyarsk
-        ;;
-        7)
-        settimezone Asia Irkutsk
-        ;;
-        8)
-        settimezone Asia Vladivostok
-        ;;
-        9)
-        settimezone Asia Kamchatka
-        ;;
-        0)
-        ;;
-        *)
-        echo "Неправильный выбор."
-        wait
-        esac
-    ;;
-    8) #Сменить пароль текущего пользователя
-    passwd
-    br
-    wait
-    ;;
-    0)
-    chosen=0
-    ;;
-    *)
-    echo "Неправильный выбор"
-    wait
-    ;;
-    esac
-;;
-3) #Установить панель управления хостингом
-chosen=3
-clear
-echo "$title"
-echo "$menu3"
-myread_dig pick
-    case "$pick" in
-    1) #ISPmanager 4
-    clear
-    echo 'Панель управления "ISPManager 4"'
-    echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
-    echo 'Системные требования: минимальные не определены'
-    echo 'Лицензия: Панель управления ПЛАТНАЯ! Без лицензии, активированной на ваш IP даже не установится.'
-    echo 'Язык: Русский'
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-        wget "http://download.ispsystem.com/install.4.sh" -r -N -nd
-        sh install.4.sh
-        rm -f install.4.sh
-      ;;
-    esac
-    ;;
     2) #ISPmanager 5
-    clear
-    echo 'Панель управления "ISPManager 5"'
-    echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
-    echo 'Системные требования: минимальные не определены'
-    echo 'Лицензия: Панель управления ПЛАТНАЯ! После установки будет Trial на 14 дней.'
-    echo 'Язык: Русский'
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-        wget http://cdn.ispsystem.com/install.sh -r -N -nd
-        sh install.sh
-        rm -f install.sh
-      ;;
-    esac
-    ;;
+    	clear
+    	echo 'Панель управления "ISPManager 5"'
+    	echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
+    	echo 'Системные требования: минимальные не определены'
+    	echo 'Лицензия: Панель управления ПЛАТНАЯ! После установки будет Trial на 14 дней.'
+    	echo 'Язык: Русский'
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			wget http://cdn.ispsystem.com/install.sh -r -N -nd
+    			sh install.sh
+    			rm -f install.sh
+    			;;
+    	esac
+    	;;
     3) #Vesta CP
-    clear
-    echo 'Панель управления "Vesta CP"'
-    echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
-    echo 'Системные требования: минимальные не определены'
-    echo 'Лицензия: Панель управления полностью бесплатна.'
-    echo 'Язык: Английский, русский'
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-      if [[ $(pidof httpd) != "" ]] #проверяем установлен ли httpd
-      then
-        echo "У вас установлен http-сервер, а Vesta CP требует установки на чистую машину."
-        echo 'Хотите удалить его перед установкой "Vesta CP"?'
-        myread_yn pick
-        case "$pick" in
-          y|Y)
-          service httpd stop
-          yum erase httpd -y
-          ;;
-        esac
-      fi
-      br
-      echo 'Начинаем установку...'
-      openport in tcp 8083
-      wget http://vestacp.com/pub/vst-install.sh -r -N -nd
-      sh vst-install.sh --force
-      rm -f vst-install.sh
-      ;;
-    esac
-    ;;
+    	clear
+    	echo 'Панель управления "Vesta CP"'
+    	echo 'Поддержка ОС: CentOS | RHEL | Debian | Ubuntu'
+    	echo 'Системные требования: минимальные не определены'
+    	echo 'Лицензия: Панель управления полностью бесплатна.'
+    	echo 'Язык: Английский, русский'
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			if [[ $(pidof httpd) != "" ]] #проверяем установлен ли httpd
+    			then
+    				echo "У вас установлен http-сервер, а Vesta CP требует установки на чистую машину."
+    				echo 'Хотите удалить его перед установкой "Vesta CP"?'
+    				myread_yn pick
+    				case "$pick" in
+    					y|Y)
+    						service httpd stop
+    						yum erase httpd -y
+    						;;
+    				esac
+    			fi
+    			br
+    			echo 'Начинаем установку...'
+    			openport in tcp 8083
+    			wget http://vestacp.com/pub/vst-install.sh -r -N -nd
+    			sh vst-install.sh --force
+    			rm -f vst-install.sh
+    			;;
+    	esac
+    	;;
     4) #Webuzo
-    clear
-    echo 'Панель управления "Webuzo"'
-    echo 'Поддержка ОС: CentOS 5.x, 6.x | RHEL 5.x, 6.x | Scientific Linux 5.x, 6.x | Ubuntu LTS'
-    echo 'Системные требования: 512 MB RAM (minimum)'
-    echo 'Лицензия: Панель управления имеет платную и бесплатную версию. Установите без лицензии для использования бесплатной версии.'
-    echo 'Язык: Английский'
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-      case "$osver1" in
-        5|6)
-        webuzo_install
-        ;;
-        7)
-        echo 'У вас CentOS 7.x. Данная панель управления не поддерживает эту версию. Выходим.'
-        wait
-        ;;
-        0)
-        echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
-        echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          webuzo_install
-          ;;
-          n|N|т|Т)
-          ;;
-          *)
-          echo 'Неправильный выбор. Выходим.'
-          wait
-          ;;
-        esac
-        ;; 
-      esac
-      ;;
-      n|N|т|Т)
-      ;;
-      *)
-      echo 'Неправильный выбор. Выходим.'
-      wait
-      ;;
-    esac
-    ;;
+    	clear
+    	echo 'Панель управления "Webuzo"'
+    	echo 'Поддержка ОС: CentOS 5.x, 6.x | RHEL 5.x, 6.x | Scientific Linux 5.x, 6.x | Ubuntu LTS'
+    	echo 'Системные требования: 512 MB RAM (minimum)'
+    	echo 'Лицензия: Панель управления имеет платную и бесплатную версию. Установите без лицензии для использования бесплатной версии.'
+    	echo 'Язык: Английский'
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			case "$osver1" in
+    				5|6)
+    					webuzo_install
+    					;;
+    				7)
+    					echo 'У вас CentOS 7.x. Данная панель управления не поддерживает эту версию. Выходим.'
+    					wait
+    					;;
+    				0)
+    					echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
+    					echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
+    					myread_yn ans
+    					case "$ans" in
+    						y|Y)
+    							webuzo_install
+    							;;
+    						n|N|т|Т)
+    							;;
+    						*)
+    							echo 'Неправильный выбор. Выходим.'
+    							wait
+    							;;
+    					esac
+    					;;
+    			esac
+    			;;
+    		n|N|т|Т)
+    			;;
+    		*)
+    			echo 'Неправильный выбор. Выходим.'
+    			wait
+    			;;
+    	esac
+    	;;
     5) #CentOS Web Panel (CWP)
-    clear
-    echo 'Панель управления "CentOS Web Panel (CWP)"'
-    echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x | CloudLinux 6.x'
-    echo 'Системные требования: 512 MB RAM (minimum)'
-    echo 'Лицензия: Панель управления полностью бесплатна.'
-    echo 'Язык: Английский'
-    br
-    echo "ВНИМАНИЕ! Данная панель будет устанавливаться очень долго (до 1 часа)!"
-    br
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-      case "$osver1" in
-        5|7)
-        echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
-        wait
-        ;;
-        6)
-        cwp_install
-        ;;
-        0)
-        echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
-        echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          cwp_install
-          ;;
-          n|N|т|Т)
-          ;;
-          *)
-          echo 'Неправильный выбор. Выходим.'
-          wait
-          ;;
-        esac
-        ;; 
-      esac
-      ;;
-      n|N|т|Т)
-      ;;
-      *)
-      echo 'Неправильный выбор. Выходим.'
-      wait
-      ;;
-    esac
-    ;;
+    	clear
+    	echo 'Панель управления "CentOS Web Panel (CWP)"'
+    	echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x | CloudLinux 6.x'
+    	echo 'Системные требования: 512 MB RAM (minimum)'
+    	echo 'Лицензия: Панель управления полностью бесплатна.'
+    	echo 'Язык: Английский'
+    	br
+    	echo "ВНИМАНИЕ! Данная панель будет устанавливаться очень долго (до 1 часа)!"
+    	br
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			case "$osver1" in
+    				5|7)
+    					echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
+    					wait
+    					;;
+    				6)
+    					cwp_install
+    					;;
+    				0)
+    					echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
+    					echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
+    					myread_yn ans
+    					case "$ans" in
+    						y|Y)
+    							cwp_install
+    							;;
+    						n|N|т|Т)
+    							;;
+    						*)
+    							echo 'Неправильный выбор. Выходим.'
+    							wait
+    							;;
+    					esac
+    					;;
+    			esac
+    			;;
+    		n|N|т|Т)
+    			;;
+    		*)
+    			echo 'Неправильный выбор. Выходим.'
+    			wait
+    			;;
+    	esac
+    	;;
     6) #ZPanel CP
-    clear
-    echo 'Панель управления "ZPanel CP"'
-    echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x'
-    echo 'Системные требования: не указаны разработчиком'
-    echo 'Лицензия: Панель управления полностью бесплатна.'
-    echo 'Язык: Английский, немецкий'
-    br
-    echo 'ВНИМАНИЕ! Поддержка данной панели давно прекращена, русификации нет. Устанавливайте на свой страх и риск.'
-    br
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-      case "$osver1" in
-        5|7)
-        echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
-        wait
-        ;;
-        6)
-        zpanel_install
-        ;;
-        0)
-        echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
-        echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          zpanel_install
-          ;;
-          n|N|т|Т)
-          ;;
-          *)
-          echo 'Неправильный выбор. Выходим.'
-          wait
-          ;;
-        esac
-        ;; 
-      esac
-      ;;
-      n|N|т|Т)
-      ;;
-      *)
-      echo 'Неправильный выбор. Выходим.'
-      wait
-      ;;
-    esac
-    ;;
+    	clear
+    	echo 'Панель управления "ZPanel CP"'
+    	echo 'Поддержка ОС: CentOS 6.x | RHEL 6.x'
+    	echo 'Системные требования: не указаны разработчиком'
+    	echo 'Лицензия: Панель управления полностью бесплатна.'
+    	echo 'Язык: Английский, немецкий'
+    	br
+    	echo 'ВНИМАНИЕ! Поддержка данной панели давно прекращена, русификации нет. Устанавливайте на свой страх и риск.'
+    	br
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			case "$osver1" in
+    				5|7)
+    					echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
+    					wait
+    					;;
+    				6)
+    					zpanel_install
+    					;;
+    				0)
+    					echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
+    					echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
+    					myread_yn ans
+    					case "$ans" in
+    						y|Y)
+    							zpanel_install
+    							;;
+    						n|N|т|Т)
+    							;;
+    						*)
+    							echo 'Неправильный выбор. Выходим.'
+    							wait
+    							;;
+    					esac
+    					;;
+    			esac
+    			;;
+    		n|N|т|Т)
+    			;;
+    		*)
+    			echo 'Неправильный выбор. Выходим.'
+    			wait
+    			;;
+    	esac
+    	;;
     7) #Ajenti
-    clear
-    echo 'Панель управления "Ajenti"'
-    echo 'Поддержка ОС: CentOS 6, 7 | Debian 6, 7, 8 | Ubuntu | Gentoo'
-    echo 'Системные требования: 35 Mb RAM '
-    echo 'Лицензия: Панель имеет как бесплатную версию, так и платную'
-    echo 'Описание: Ajenti - это панель управления сервером, но к ней есть Addon под названием Ajenti V,'
-    echo '          с помощью которого можно управлять хостингом.'
-    echo 'Язык: Английский, русский и ещё 42 других языка'
-    echo 'Хотите установить?'
-    myread_yn pick
-    case "$pick" in
-      y|Y)
-      case "$osver1" in
-        4|5)
-        echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
-        wait
-        ;;
-        6|7)
-        ajenti_install
-        ;;
-        0)
-        echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
-        echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
-        myread_yn ans
-        case "$ans" in
-          y|Y)
-          ajenti_install
-          ;;
-          n|N|т|Т)
-          ;;
-          *)
-          echo 'Неправильный выбор. Выходим.'
-          wait
-          ;;
-        esac
-        ;; 
-      esac
-      ;;
-      n|N|т|Т)
-      ;;
-      *)
-      echo 'Неправильный выбор. Выходим.'
-      wait
-      ;;
-    esac    
-    ;;
+    	clear
+    	echo 'Панель управления "Ajenti"'
+    	echo 'Поддержка ОС: CentOS 6, 7 | Debian 6, 7, 8 | Ubuntu | Gentoo'
+    	echo 'Системные требования: 35 Mb RAM '
+    	echo 'Лицензия: Панель имеет как бесплатную версию, так и платную'
+    	echo 'Описание: Ajenti - это панель управления сервером, но к ней есть Addon под названием Ajenti V,'
+    	echo '          с помощью которого можно управлять хостингом.'
+    	echo 'Язык: Английский, русский и ещё 42 других языка'
+    	echo 'Хотите установить?'
+    	myread_yn pick
+    	case "$pick" in
+    		y|Y)
+    			case "$osver1" in
+    				4|5)
+    					echo "У вас CentOS $osver1.x. Данная панель управления не поддерживает эту версию. Выходим."
+    					wait
+    					;;
+    				6|7)
+    					ajenti_install
+    					;;
+    				0)
+    					echo 'нам не удалось определить Вашу ОС. Возможно, она не поддерживается Webuzo.'
+    					echo 'Хотите всё равно установить данную панель управления на свой страх и риск?'
+    					myread_yn ans
+    					case "$ans" in
+    						y|Y)
+    							ajenti_install
+    							;;
+    						n|N|т|Т)
+    							;;
+    						*)
+    							echo 'Неправильный выбор. Выходим.'
+    							wait
+    							;;
+    					esac
+    					;; 
+    			esac
+    			;;
+    		n|N|т|Т)
+    			;;
+    		*)
+    			echo 'Неправильный выбор. Выходим.'
+    			wait
+    			;;
+    	esac
+    	;;
     0)
-    chosen=0
-    ;;
+    	chosen=0
+    	;;
     *)
-    echo "Неправильный выбор."
-    wait
-    ;;
-    esac
-;;
+    	echo "Неправильный выбор."
+    	wait
+    	;;
+  esac
+  ;;
 4) #Установка и настройка VPN-сервера
 chosen=4
 clear
